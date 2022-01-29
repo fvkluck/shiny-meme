@@ -39,9 +39,9 @@
         [rn/button {:on-press #(swap! day update :goals dissoc g-id) :title "Remove"}]])
      [rn/text-input {:placeholder "my new goal" :on-change-text #(reset! new-goal-text %)
                      :on-end-editing #(do
-                                           (add-goal day @new-goal-text)
-                                           (.focus (-> % .-target))
-                                           (.clear (-> % .-target)))}]
+                                        (add-goal day @new-goal-text)
+                                        (.focus (-> % .-target))
+                                        (.clear (-> % .-target)))}]
      [rn/button {:on-press #(add-goal day @new-goal-text) :title "save"}]]))
 
 (defn hello []
