@@ -9,8 +9,7 @@
                         :reminder-time "17:00"
                         :days [{:date "date"
                                 :goals {1 {:text "This is my first goal"}
-                                        2 {:text "This is my second goal"}}
-                                :goal "please fill out your goal"}]}))
+                                        2 {:text "This is my second goal"}}}]}))
 
 (defn logger [x]
   (do
@@ -18,30 +17,35 @@
     (do (js/console.log k) (js/console.log (aget x k))))
   x))
 
-(defn press-button [e]
-  (js/alert "hallo"))
-
-(defn get-by-id [goals id]
+(defn new-id [goals]
   (->> goals
-       (filter #(= (% id)))
-       first))
+      keys
+      (apply max)
+      inc))
 
-(defn update-goal-text [day id new-text]
-  (let [g (get-by-id (:goals day) id)]))
+(defn add-goal [day text]
+  (let [id (new-id (:goals @day))]
+    (swap! day update :goals conj [id {:text text}])))
 
 (defn cue-view [day]
-  [rn/view {:style {:fles 1 :align-items "center" :justify-content "center"}}
-   [rn/text {:style title-style} "Today is the day"]
-   #_[rn/text (str "What do you want to do on " (t/day-of-week (:date @state)) " " (:date @state)) "?"]
-   [rn/text "Please take a moment to consider what you want to achieve today."]
-   (for [[g-id g] (:goals @day)]
-     [rn/text-input {:key g-id :default-value (:text g)
-                     :on-change-text #(swap! day assoc-in [:goals g-id :text] %)}])
-   [rn/text-input {:default-value "something" :on-change-text #(swap! day assoc :goal %)}]])
+  (let [new-goal-text (r/atom "")]
+    [rn/view {:style {:flex 1 :align-items "center" :justify-content "center"}}
+     [rn/text {:style title-style} "Set your goals"]
+     [rn/text "Please take a moment to consider what you want to achieve today."]
+     (for [[g-id g] (:goals @day)]
+       [rn/view {:key g-id :flex-direction "row" :margin-bottom 10}
+        [rn/text-input {:key g-id :default-value (:text g)
+                        :on-change-text #(swap! day assoc-in [:goals g-id :text] %)}]
+        [rn/button {:on-press #(swap! day update :goals dissoc g-id) :title "Remove"}]])
+     [rn/text-input {:placeholder "my new goal" :on-change-text #(reset! new-goal-text %)
+                     :on-end-editing #(do
+                                           (add-goal day @new-goal-text)
+                                           (.focus (-> % .-target))
+                                           (.clear (-> % .-target)))}]
+     [rn/button {:on-press #(add-goal day @new-goal-text) :title "save"}]]))
 
 (defn hello []
   [rn/view  {:style  {:flex 1 :align-items  "center" :justify-content  "center"}}
-   [rn/button {:on-press press-button :title "press me"}]
    [cue-view (r/cursor state [:days 0])]])
 
 (defn ^:export -main  [& args]
