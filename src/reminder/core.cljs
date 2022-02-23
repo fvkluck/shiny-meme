@@ -4,11 +4,14 @@
             [reagent.core :as r]
             [reagent.react-native :as rn]
             [tick.core :as t]
-            ["@notifee/react-native" :as notifee :refer [default]]))
+            ["@notifee/react-native" :refer [TriggerType]]
+            ["@notifee/react-native$default" :as n]
+            ["@react-navigation/native" :refer [NavigationContainer]]
+            ["@react-navigation/native-stack" :as nav-stack]))
 
 (def title-style {:font-size 50})
 
-(def n (aget notifee "default"))
+(def Stack (nav-stack/createNativeStackNavigator))
 
 (defonce state (r/atom {:cue-time "08:30" 
                         :reminder-time "17:00"
@@ -17,11 +20,10 @@
                                         2 {:text "This is my second goal"}}}]}))
 
 (defn logger [x]
-  (do
-    (js/console.log "start logger")
-    (doseq [k (js-keys x)]
-      (do (js/console.log k) (js/console.log (aget x k))))
-  x))
+  (js/console.log "start logger")
+  (doseq [k (js-keys x)]
+    (js/console.log k) (js/console.log (aget x k)))
+  x)
 
 (defn new-id [goals]
   (->> goals
