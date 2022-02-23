@@ -97,14 +97,40 @@
                                                       (add-goal day @new-goal-text)
                                                       (.focus (-> % .-target))
                                                       (.clear (-> % .-target)))}]]))
+(defonce num (r/atom 0))
 
 (defn hello []
-  [:> NavigationContainer {}
     [rn/view  {:style  {:flex 1 :align-items  "center" :justify-content  "center"}}
-     [reminder-view (r/cursor state [:days 0])]]])
+     [reminder-view (r/cursor state [:days 0])]])
+
+(defn home [_navigation]
+  [rn/view {:style {:flex 1 :align-items "center" :justify-content "center"}}
+   [rn/text {} (str "count: " @num)]
+   [rn/button {:on-press #(swap! num inc) :title "increase"}]
+   [rn/button {:on-press #(.navigate (:navigation _navigation) "home2") :title "go to home2"}]
+   [rn/button {:on-press #(.navigate (:navigation _navigation) "reminder") :title "go to reminder-view"}]])
+
+(defn home2 [_navigation]
+  [rn/view
+   [rn/text {} (str "count2: " @num)]
+   [rn/button {:title "press me" :on-press #(swap! num inc)}]])
+
+(defn app []
+  [:> NavigationContainer {}
+   [:> (.-Navigator Stack) {:screen-options {:title "Awesome Project"
+                                             :header-style {:background-color "green" :height 100}
+                                             :header-tint-color "#fff"
+                                             :header-title-style {:font-size 30 :text-align "center"}}}
+    [:> (.-Screen Stack) {:name "home" :component (r/reactify-component home)
+                          :options {:title "Home Page"}}]
+    [:> (.-Screen Stack) {:name "home2" :component (r/reactify-component home2)
+                          :options {:title "Home Page2"}}]
+    [:> (.-Screen Stack) {:name "reminder" :component (r/reactify-component hello)
+                          :options {:title "This is your reminder"}}]
+    ]])
 
 (defn ^:export -main  [& args]
   (go
     (let [c (<p! (n/createChannel #js {:id "reminder-channel" :name "channel for reminder app"}))]
       (swap! state assoc :channel-name c)))
-  (r/as-element [hello]))
+  (r/as-element [app]))
