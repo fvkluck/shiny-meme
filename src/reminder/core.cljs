@@ -107,14 +107,8 @@
   [rn/view {:style {:flex 1 :align-items "center" :justify-content "center"}}
    [rn/text {} (str "count: " @num)]
    [rn/button {:on-press #(swap! num inc) :title "increase"}]
-   [rn/button {:on-press #(.navigate (:navigation _navigation) "home2") :title "go to home2"}]
    [rn/button {:on-press #(.navigate (:navigation _navigation) "cue") :title "go to cue-view"}]
    [rn/button {:on-press #(.navigate (:navigation _navigation) "reminder") :title "go to reminder-view"}]])
-
-(defn home2 [_navigation]
-  [rn/view
-   [rn/text {} (str "count2: " @num)]
-   [rn/button {:title "press me" :on-press #(swap! num inc)}]])
 
 (defn app []
   [:> NavigationContainer {}
@@ -124,8 +118,6 @@
                                              :header-title-style {:font-size 30 :text-align "center"}}}
     [:> (.-Screen Stack) {:name "home" :component (r/reactify-component home)
                           :options {:title "Home Page"}}]
-    [:> (.-Screen Stack) {:name "home2" :component (r/reactify-component home2)
-                          :options {:title "Home Page2"}}]
     [:> (.-Screen Stack) {:name "reminder" :component (r/reactify-component hello)
                           :options {:title "This is your reminder"}}]
     [:> (.-Screen Stack) {:name "cue" :component (r/reactify-component cue-view)
