@@ -97,16 +97,12 @@
                                                       (add-goal day @new-goal-text)
                                                       (.focus (-> % .-target))
                                                       (.clear (-> % .-target)))}]]))
-(defonce num (r/atom 0))
-
 (defn hello []
     [rn/view  {:style  {:flex 1 :align-items  "center" :justify-content  "center"}}
      [reminder-view (r/cursor state [:days 0])]])
 
 (defn home [_navigation]
   [rn/view {:style {:flex 1 :align-items "center" :justify-content "center"}}
-   [rn/text {} (str "count: " @num)]
-   [rn/button {:on-press #(swap! num inc) :title "increase"}]
    [rn/button {:on-press #(.navigate (:navigation _navigation) "cue") :title "go to cue-view"}]
    [rn/button {:on-press #(.navigate (:navigation _navigation) "reminder") :title "go to reminder-view"}]])
 
