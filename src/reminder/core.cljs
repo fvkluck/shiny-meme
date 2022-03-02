@@ -64,7 +64,7 @@
   (.setMinutes date 11)
   (send-notification "title" "body" (:channel-name @state) (.getTime date)))
 
-(defn cue-view [_navigation]
+(defn cue-view [{:keys [navigation]}]
   (let [day (r/cursor state [:days 0])
         new-goal-text (r/atom "")]
     (r/as-element [rn/view {:style {:flex 1 :align-items "center" :justify-content "center"}}
@@ -82,7 +82,7 @@
                                                       (.clear (-> % .-target)))}]
                    [rn/button {:on-press #(send-notification "Dit is een titel" "dit is een body") :title "Remind me tonight!"}]])))
 
-(defn reminder-view [_navigation]
+(defn reminder-view [{:keys [navigation]}]
   (let [new-goal-text (r/atom "")
         day (r/cursor state [:days 0])]
     [rn/view {:style {:flex 1 :align-items "center" :justify-content "center"}}
@@ -98,10 +98,10 @@
                                                       (add-goal day @new-goal-text)
                                                       (.focus (-> % .-target))
                                                       (.clear (-> % .-target)))}]]))
-(defn home [_navigation]
+(defn home [{:keys [navigation]}]
   [rn/view {:style {:flex 1 :align-items "center" :justify-content "center"}}
-   [rn/button {:on-press #(.navigate (:navigation _navigation) "cue") :title "go to cue-view"}]
-   [rn/button {:on-press #(.navigate (:navigation _navigation) "reminder") :title "go to reminder-view"}]])
+   [rn/button {:on-press #(.navigate navigation "cue") :title "go to cue-view"}]
+   [rn/button {:on-press #(.navigate navigation "reminder") :title "go to reminder-view"}]])
 
 (defn app []
   [:> NavigationContainer {}
