@@ -82,8 +82,9 @@
                                                       (.clear (-> % .-target)))}]
                    [rn/button {:on-press #(send-notification "Dit is een titel" "dit is een body") :title "Remind me tonight!"}]])))
 
-(defn reminder-view [day]
-  (let [new-goal-text (r/atom "")]
+(defn reminder-view [_navigation]
+  (let [new-goal-text (r/atom "")
+        day (r/cursor state [:days 0])]
     [rn/view {:style {:flex 1 :align-items "center" :justify-content "center"}}
                    [rn/text {:style title-style} "Your plan"]
                    [rn/text "For better or for worse this is what you had planned"]
@@ -97,10 +98,6 @@
                                                       (add-goal day @new-goal-text)
                                                       (.focus (-> % .-target))
                                                       (.clear (-> % .-target)))}]]))
-(defn hello []
-    [rn/view  {:style  {:flex 1 :align-items  "center" :justify-content  "center"}}
-     [reminder-view (r/cursor state [:days 0])]])
-
 (defn home [_navigation]
   [rn/view {:style {:flex 1 :align-items "center" :justify-content "center"}}
    [rn/button {:on-press #(.navigate (:navigation _navigation) "cue") :title "go to cue-view"}]
@@ -114,7 +111,7 @@
                                              :header-title-style {:font-size 30 :text-align "center"}}}
     [:> (.-Screen Stack) {:name "home" :component (r/reactify-component home)
                           :options {:title "Home Page"}}]
-    [:> (.-Screen Stack) {:name "reminder" :component (r/reactify-component hello)
+    [:> (.-Screen Stack) {:name "reminder" :component (r/reactify-component reminder-view)
                           :options {:title "This is your reminder"}}]
     [:> (.-Screen Stack) {:name "cue" :component (r/reactify-component cue-view)
                           :options {:title "This is your cue"}}]
