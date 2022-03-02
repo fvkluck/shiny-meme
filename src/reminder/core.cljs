@@ -26,10 +26,12 @@
   x)
 
 (defn new-id [goals]
-  (->> goals
-      keys
-      (apply max)
-      inc))
+  (if (empty? goals)
+    0
+    (->> goals
+         keys
+         (apply max)
+         inc)))
 
 (defn add-goal [day text]
   (let [id (new-id (:goals @day))]
