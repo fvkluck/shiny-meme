@@ -64,8 +64,8 @@
   (.setMinutes date 11)
   (send-notification "title" "body" (:channel-name @state) (.getTime date)))
 
-(defn cue-view []
-  (let [day (get-in state [:days 0])
+(defn cue-view [_navigation]
+  (let [day (r/cursor state [:days 0])
         new-goal-text (r/atom "")]
     (r/as-element [rn/view {:style {:flex 1 :align-items "center" :justify-content "center"}}
                    [rn/text {:style title-style} "Set your goals"]
@@ -108,6 +108,7 @@
    [rn/text {} (str "count: " @num)]
    [rn/button {:on-press #(swap! num inc) :title "increase"}]
    [rn/button {:on-press #(.navigate (:navigation _navigation) "home2") :title "go to home2"}]
+   [rn/button {:on-press #(.navigate (:navigation _navigation) "cue") :title "go to cue-view"}]
    [rn/button {:on-press #(.navigate (:navigation _navigation) "reminder") :title "go to reminder-view"}]])
 
 (defn home2 [_navigation]
@@ -127,6 +128,8 @@
                           :options {:title "Home Page2"}}]
     [:> (.-Screen Stack) {:name "reminder" :component (r/reactify-component hello)
                           :options {:title "This is your reminder"}}]
+    [:> (.-Screen Stack) {:name "cue" :component (r/reactify-component cue-view)
+                          :options {:title "This is your cue"}}]
     ]])
 
 (defn ^:export -main  [& args]
