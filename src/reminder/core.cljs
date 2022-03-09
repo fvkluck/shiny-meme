@@ -25,9 +25,8 @@
 
 (defonce state (r/atom {:cue-time "08:30" 
                         :reminder-time "17:00"
-                        :days [{:date "date"
-                                :goals {1 {:text "This is my first goal"}
-                                        2 {:text "This is my second goal"}}}]}))
+                        :goals {1 {:text "This is my first goal"}
+                                2 {:text "This is my second goal"}}}))
 
 (defn logger [x]
   (js/console.log "start logger")
@@ -43,9 +42,9 @@
          (apply max)
          inc)))
 
-(defn add-goal [day text]
-  (let [id (new-id (:goals day))]
-    (update day :goals conj [id {:text text}])))
+(defn add-goal [state text]
+  (let [id (new-id (:goals state))]
+    (update state :goals conj [id {:text text}])))
 
 (defn send-notification [title body & {:keys [channel-name trigger-time]
                                        :or {channel-name (:channel-name @state)
@@ -58,33 +57,32 @@
                                           "timestamp" (.getTime (js/Date. trigger-time))})))
 
 (defn cue-view [{:keys [navigation]}]
-  (let [day (r/cursor state [:days 0])
-        new-goal-text (r/atom "")]
+  (let [new-goal-text (r/atom "")]
     [rn/view {:style {:flex 1 :align-items "center" :justify-content "center"}}
      [rn/text {:style title-style} "Set your goals"]
      [rn/text "Please take a moment to consider what you want to achieve today."]
-     (for [[g-id g] (:goals @day)]
+     (for [[g-id g] (:goals @state)]
        [rn/view {:key g-id :flex-direction "row" :margin-bottom 10}
         [rn/text-input {:key g-id :default-value (:text g)
-                        :on-change-text #(swap! day assoc-in [:goals g-id :text] %)}]
-        [rn/button {:on-press #(swap! day update :goals dissoc g-id) :title "Remove"}]])
+                        :on-change-text #(swap! state assoc-in [:goals g-id :text] %)}]
+        [rn/button {:on-press #(swap! state update :goals dissoc g-id) :title "Remove"}]])
      [rn/text-input {:placeholder "my new goal" :on-change-text #(reset! new-goal-text %)
                      :on-end-editing #(do
-                                        (swap! day add-goal @new-goal-text)
+                                        (swap! state add-goal @new-goal-text)
                                         (.focus (-> % .-target))
                                         (.clear (-> % .-target)))}]
      [rn/button {:on-press #(send-notification "Dit is een titel" "dit is een body") :title "Remind me tonight!"}]]))
 
 (defn reminder-view [{:keys [navigation]}]
-  (let [day (r/cursor state [:days 0])]
+  (let []
     [rn/view {:style {:flex 1 :align-items "center" :justify-content "center"}}
                    [rn/text {:style title-style} "Your plan"]
                    [rn/text "For better or for worse this is what you had planned"]
-                   (for [[g-id g] (:goals @day)]
+                   (for [[g-id g] (:goals @state)]
                      [rn/view {:key g-id :flex-direction "row" :margin-bottom 10}
                       [rn/text {:key g-id
                                 :style {:color (if (:finished g) "#009900" "#ff0000")}} (:text g)]
-                      [rn/button {:on-press #(swap! day update-in [:goals g-id] assoc :finished true) :title "Finished"}]])]))
+                      [rn/button {:on-press #(swap! state update-in [:goals g-id] assoc :finished true) :title "Finished"}]])]))
 
 (defn home [{:keys [navigation]}]
   [rn/view {:style {:flex 1 :align-items "center" :justify-content "center"}}
