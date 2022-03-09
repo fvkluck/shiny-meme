@@ -44,8 +44,8 @@
          inc)))
 
 (defn add-goal [day text]
-  (let [id (new-id (:goals @day))]
-    (swap! day update :goals conj [id {:text text}])))
+  (let [id (new-id (:goals day))]
+    (update day :goals conj [id {:text text}])))
 
 (defn send-notification [title body & {:keys [channel-name trigger-time]
                                        :or {channel-name (:channel-name @state)
@@ -70,7 +70,7 @@
         [rn/button {:on-press #(swap! day update :goals dissoc g-id) :title "Remove"}]])
      [rn/text-input {:placeholder "my new goal" :on-change-text #(reset! new-goal-text %)
                      :on-end-editing #(do
-                                        (add-goal day @new-goal-text)
+                                        (swap! day add-goal @new-goal-text)
                                         (.focus (-> % .-target))
                                         (.clear (-> % .-target)))}]
      [rn/button {:on-press #(send-notification "Dit is een titel" "dit is een body") :title "Remind me tonight!"}]]))
