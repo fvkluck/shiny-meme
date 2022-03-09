@@ -11,6 +11,8 @@
             ["@react-navigation/native-stack" :as nav-stack]))
 
 (comment
+  "Start a clojure (not clojurescript!) repl, with at least the stuff below in the dependencies,
+   open the editor, connect to it and run the code below"
   (require '[clojure.edn :as edn]
            '[clojure.java.io :as io]
            '[cider.piggieback]
