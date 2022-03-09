@@ -81,7 +81,8 @@
         [(r/adapt-react-class rn-js/Pressable) {:on-press #(swap! state update :goals dissoc g-id) :style button-style} [rn/text {:style text-style} "Remove"]]])
      [rn/text-input {:placeholder "my new goal" :on-change-text #(reset! new-goal-text %)
                      :on-end-editing #(do
-                                        (swap! state add-goal @new-goal-text)
+                                        (when (not ( empty? @new-goal-text))
+                                          (swap! state add-goal @new-goal-text))
                                         (.focus (-> % .-target))
                                         (.clear (-> % .-target)))}]
      [rn/button {:on-press #(send-notification "Dit is een titel" "dit is een body") :title "Remind me tonight!"}]]))
