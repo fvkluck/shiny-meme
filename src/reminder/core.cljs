@@ -86,16 +86,24 @@
                                         (.clear (-> % .-target)))}]
      [rn/button {:on-press #(send-notification "Dit is een titel" "dit is een body") :title "Remind me tonight!"}]]))
 
+(comment (let [goals (get-in @state [:goals])]
+           (let [body (->> goals
+                           vals
+                           (map :text)
+                           (map (fn [g] [:p g]))
+                           (str))]
+             #_body
+             (send-notification "Remember your goals" body))))
+
 (defn reminder-view [{:keys [navigation]}]
-  (let []
-    [rn/view {:style {:flex 1 :align-items "center" :justify-content "center"}}
-                   [rn/text {:style title-style} "Your plan"]
-                   [rn/text "For better or for worse this is what you had planned"]
-                   (for [[g-id g] (:goals @state)]
-                     [rn/view {:key g-id :flex-direction "row" :margin-bottom 10}
-                      [rn/text {:key g-id
-                                :style {:color (if (:finished g) "#009900" "#ff0000")}} (:text g)]
-                      [rn/button {:on-press #(swap! state update-in [:goals g-id] assoc :finished true) :title "Finished"}]])]))
+  [rn/view {:style {:flex 1 :align-items "center" :justify-content "center"}}
+   [rn/text {:style title-style} "Your plan"]
+   [rn/text "For better or for worse this is what you had planned"]
+   (for [[g-id g] (:goals @state)]
+     [rn/view {:key g-id :flex-direction "row" :margin-bottom 10}
+      [rn/text {:key g-id
+                :style {:color (if (:finished g) "#009900" "#ff0000")}} (:text g)]
+      [rn/button {:on-press #(swap! state update-in [:goals g-id] assoc :finished true) :title "Finished"}]])])
 
 (defn home [{:keys [navigation]}]
   [rn/view {:style {:flex 1 :align-items "center" :justify-content "center"}}
