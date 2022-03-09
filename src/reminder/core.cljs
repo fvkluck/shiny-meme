@@ -59,6 +59,18 @@
   (let [id (new-id (:goals state))]
     (update state :goals conj [id {:text text}])))
 
+(defn remove-goal [state g-id]
+  (update state :goals dissoc g-id))
+
+(defn update-goal-text [state g-id text]
+  (assoc-in state [:goals g-id :text] text))
+
+(defn mark-finished [state g-id]
+  (update-in state [:goals g-id] assoc :finished true))
+
+(defn finished? [goal]
+  (:finished goal))
+
 (defn send-notification [title body & {:keys [channel-name trigger-time]
                                        :or {channel-name (:channel-name @state)
                                             trigger-time (t/>> (t/now) (t/new-duration 2 :seconds))}}]
@@ -77,11 +89,12 @@
      (for [[g-id g] (:goals @state)]
        [rn/view {:key g-id :flex-direction "row" :margin-bottom 10}
         [rn/text-input {:key g-id :default-value (:text g)
-                        :on-change-text #(swap! state assoc-in [:goals g-id :text] %)}]
-        [(r/adapt-react-class rn-js/Pressable) {:on-press #(swap! state update :goals dissoc g-id) :style button-style} [rn/text {:style text-style} "Remove"]]])
+                        :on-change-text #(swap! state update-goal-text g-id %)}]
+        [(r/adapt-react-class rn-js/Pressable) {:on-press #(swap! state remove-goal g-id)
+                                                :style button-style} [rn/text {:style text-style} "Remove"]]])
      [rn/text-input {:placeholder "my new goal" :on-change-text #(reset! new-goal-text %)
                      :on-end-editing #(do
-                                        (when (not ( empty? @new-goal-text))
+                                        (when (seq @new-goal-text)
                                           (swap! state add-goal @new-goal-text))
                                         (.focus (-> % .-target))
                                         (.clear (-> % .-target)))}]
@@ -103,8 +116,8 @@
    (for [[g-id g] (:goals @state)]
      [rn/view {:key g-id :flex-direction "row" :margin-bottom 10}
       [rn/text {:key g-id
-                :style {:color (if (:finished g) "#009900" "#ff0000")}} (:text g)]
-      [rn/button {:on-press #(swap! state update-in [:goals g-id] assoc :finished true) :title "Finished"}]])])
+                :style {:color (if (finished? g) "#009900" "#ff0000")}} (:text g)]
+      [rn/button {:on-press #(swap! state mark-finished g-id) :title "Finished"}]])])
 
 (defn home [{:keys [navigation]}]
   [rn/view {:style {:flex 1 :align-items "center" :justify-content "center"}}
