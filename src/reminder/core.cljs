@@ -3,6 +3,7 @@
             [cljs.core.async.interop :refer [<p!]]
             [reagent.core :as r]
             [reagent.react-native :as rn]
+            ["react-native" :as rn-js]
             [tick.core :as t]
             ["@notifee/react-native" :refer [TriggerType]]
             ["@notifee/react-native$default" :as n]
@@ -21,7 +22,19 @@
 
 (def title-style {:font-size 50})
 
-(def Stack (nav-stack/createNativeStackNavigator))
+(def button-style { :align-items "center"
+                   :justify-content "center"
+                   :padding-vertical 12
+                   :padding-horizontal 32
+                   :border-radius 4
+                   :elevation 3
+                   :background-color "black"})
+
+(def text-style { :font-size 16
+                 :line-height 21
+                 :font-weight "bold"
+                 :letter-spacing 0.25
+                 :color "white"})
 
 (defonce state (r/atom {:cue-time "08:30" 
                         :reminder-time "17:00"
@@ -65,7 +78,7 @@
        [rn/view {:key g-id :flex-direction "row" :margin-bottom 10}
         [rn/text-input {:key g-id :default-value (:text g)
                         :on-change-text #(swap! state assoc-in [:goals g-id :text] %)}]
-        [rn/button {:on-press #(swap! state update :goals dissoc g-id) :title "Remove"}]])
+        [(r/adapt-react-class rn-js/Pressable) {:on-press #(swap! state update :goals dissoc g-id) :style button-style} [rn/text {:style text-style} "Remove"]]])
      [rn/text-input {:placeholder "my new goal" :on-change-text #(reset! new-goal-text %)
                      :on-end-editing #(do
                                         (swap! state add-goal @new-goal-text)
@@ -88,6 +101,8 @@
   [rn/view {:style {:flex 1 :align-items "center" :justify-content "center"}}
    [rn/button {:on-press #(.navigate navigation "cue") :title "go to cue-view"}]
    [rn/button {:on-press #(.navigate navigation "reminder") :title "go to reminder-view"}]])
+
+(def Stack (nav-stack/createNativeStackNavigator))
 
 (defn app []
   [:> NavigationContainer {}
