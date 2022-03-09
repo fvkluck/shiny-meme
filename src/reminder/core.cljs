@@ -9,6 +9,16 @@
             ["@react-navigation/native" :refer [NavigationContainer]]
             ["@react-navigation/native-stack" :as nav-stack]))
 
+(comment
+  (require '[clojure.edn :as edn]
+           '[clojure.java.io :as io]
+           '[cider.piggieback]
+           '[krell.api :as krell]
+           '[krell.repl])
+
+  (def config (edn/read-string (slurp (io/file "build.edn"))))
+  (apply cider.piggieback/cljs-repl (krell.repl/repl-env) (mapcat identity config)))
+
 (def title-style {:font-size 50})
 
 (def Stack (nav-stack/createNativeStackNavigator))
