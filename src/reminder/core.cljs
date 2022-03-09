@@ -73,15 +73,38 @@
 (defn finished? [goal]
   (:finished goal))
 
-(defn send-notification [title body & {:keys [channel-name trigger-time]
+(defn send-notification
+  "Not very clean interface yet. By default will send a notification 2 seconds from now. You can also input a trigger-time, or a time-str"
+  [title body & {:keys [channel-name trigger-time time-str]
                                        :or {channel-name (:channel-name @state)
                                             trigger-time (t/>> (t/now) (t/new-duration 2 :seconds))}}]
-  (go
-    <p! (n/createTriggerNotification #js {"title" title
-                                          "body" body
-                                          "android" #js {"channelId" channel-name}}
-                                     #js {"type" (.-TIMESTAMP TriggerType)
-                                          "timestamp" (.getTime (js/Date. trigger-time))})))
+  (let [tt (if time-str
+             (->> time-str
+                  (t/time)
+                  (t/at (t/today))
+                  (t/inst))
+             trigger-time)]
+    (go
+      <p! (n/createTriggerNotification #js {"title" title
+                                            "body" body
+                                            "android" #js {"channelId" channel-name}}
+                                       #js {"type" (.-TIMESTAMP TriggerType)
+                                            "timestamp" (.getTime (js/Date. tt))}))))
+
+(comment
+  (send-notification "title" "body" :trigger-time (t/inst (t/at (t/today) (t/time "14:33"))))
+  (send-notification "title" "body" :time-str "15:17"))
+
+(defn send-notification-for-goal
+  "TODO: separate calculation <> action"
+  [goals]
+  (let [body (->> goals
+                  vals
+                  (map :text)
+                  (map (fn [g] [:p g]))
+                  (str))]
+    #_body
+    (send-notification "Remember your goals" body)))
 
 (defn cue-view [{:keys [navigation]}]
   (let [new-goal-text (r/atom "")]
@@ -100,16 +123,7 @@
                                           (swap! state add-goal @new-goal-text))
                                         (.focus (-> % .-target))
                                         (.clear (-> % .-target)))}]
-     [rn/button {:on-press #(send-notification "Dit is een titel" "dit is een body") :title "Remind me tonight!"}]]))
-
-(comment (let [goals (get-in @state [:goals])]
-           (let [body (->> goals
-                           vals
-                           (map :text)
-                           (map (fn [g] [:p g]))
-                           (str))]
-             #_body
-             (send-notification "Remember your goals" body))))
+     [rn/button {:on-press #(send-notification-for-goal (:goals @state)) :title "Remind me tonight!"}]]))
 
 (defn reminder-view [{:keys [navigation]}]
   [rn/view {:style {:flex 1 :align-items "center" :justify-content "center"}}
